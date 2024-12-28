@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 class Enemy:
     def __init__(self, name, health=100, ad=10):
         self.name = name
@@ -20,3 +22,11 @@ class Enemy:
     def use_ability(self):
         """Each enemy type must implement this method."""
         pass
+
+class FireSprite(Enemy):
+    def __init__(self, name, health=100, ad=10):
+        super().__init__(name, health, ad)
+
+    def use_ability(self):
+        print(f"{self.name} unleashes a fireball, burning everything in sight!")
+

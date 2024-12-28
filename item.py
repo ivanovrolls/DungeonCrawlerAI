@@ -1,8 +1,9 @@
+from abc import ABC, abstractmethod
+
 class item:
-    def __init__(self, name, stats, active):
+    def __init__(self, name, stats):
         self.name = name
         self.stats = stats
-        self.active = active
 
     @abstractmethod
     def stats(self, player):
@@ -13,3 +14,13 @@ class item:
     def active(self, player):
         """Each item type must implement this method."""
         pass
+
+class HealingPotion(item):
+    def __init__(self, name, stats):
+        super().__init__(name, stats)
+
+    def use(self, player):
+        healing = self.stats.get("health", 0)
+        player.health += healing
+        print(f"{player.name} used {self.name} and restored {healing} health!")
+
