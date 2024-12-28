@@ -19,10 +19,31 @@ class Dungeon:
                 if random.random() < 0.33: #33% chance to spawn a room
                     self.layout[y][x] = "R" 
                     self.rooms.append({"x": x, "y": y, "type": random.choice(["enemy", "treasure", "empty"])})
+        if self.rooms:
+            self.start_position = {"x": self.rooms[0]["x"], "y": self.rooms[0]["y"]}
 
     def display_map(self):
         for row in self.layout:
             print(" ".join(row))
+
+    def get_neighboring_rooms(self, player_position):
+        directions = [
+            {"x": 0, "y": -1},  #n
+            {"x": 0, "y": 1},   #s
+            {"x": -1, "y": 0},  #w
+            {"x": 1, "y": 0},   #e
+        ]
+        neighbors = []
+        for direction in directions:
+            neighbor_x = player_position["x"] + direction["x"]
+            neighbor_y = player_position["y"] + direction["y"]
+
+            #check to see if neighbour room is a valid room and within distance to move to
+            if 0 <= neighbor_x < self.width and 0 <= neighbor_y < self.height:
+                for room in self.rooms:
+                    if room["x"] == neighbor_x and room["y"] == neighbor_y:
+                        neighbors.append({"x": neighbor_x, "y": neighbor_y})
+        return neighbors
 
     def describe_dungeon(self):
         room_descriptions = []
@@ -45,15 +66,23 @@ class Dungeon:
     def generate_with_gpt(self, prompt):
         try:
             completion = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a creative dungeon master."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=200,  # Adjust token limit as needed
-                temperature=0.7  # Adjust creativity level as needed
+                max_tokens=200,  #adjust token limit as needed
+                temperature=0.7  #adjust creativity level as needed
             )
             return completion.choices[0].message.content.strip()
         except Exception as e:
             print("Error generating description:", e)
             return "An ancient dungeon shrouded in mystery, with countless secrets to uncover."
+
+    def display_current_room(self, player_position):
+        """Display details of the current room based on the player's position."""
+        for room in self.rooms:
+            if room["x"] == player_position["x"] and room["y"] == player_position["y"]:
+                print(f"You are in a {room['type']} room at ({room['x']}, {room['y']}).")
+                return
+        print(f"You are in an empty room at ({player_position['x']}, {player_position['y']}).")
